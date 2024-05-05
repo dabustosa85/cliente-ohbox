@@ -1,0 +1,39 @@
+:root {
+    --color-naranjo: #ed722e;
+    --color-amarillo: #f7c844;
+    --color-negro: #000;
+    --color-blanco: #fff;
+}
+
+.subtitulo1 {
+    color: var(--color-naranjo);
+}
+
+.subtitulo2 {
+    color: var(--color-amarillo);
+}
+
+.titulo1 {
+    color: var(--color-negro);
+}
+
+.titulo2 {
+    color: var(--color-blanco);
+}
+
+.fondo-amarillo {
+    background-color: var(--color-amarillo);
+}
+
+.listado-color {
+    color: var(--color-amarillo);
+}
+
+.sin-bordes {
+    margin-bottom: 0;
+}
+
+.margensuperior{
+  padding-top: 25rem !important;
+}
+}

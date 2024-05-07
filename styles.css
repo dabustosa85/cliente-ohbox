@@ -61,3 +61,7 @@
     height: 100%;
     cursor: pointer;
 }
+
+.fondo-oscuro {
+    background-color: #1d1d1b;
+}

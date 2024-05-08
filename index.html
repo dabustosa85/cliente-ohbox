@@ -4,14 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Landing Page</title>
-    <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
           rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Fancybox -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+    <!-- NProgress -->
+    <!-- NProgress CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css"/>
+    <!-- NProgress JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+
 </head>
 <body>
 <!-- MENU -->
@@ -104,7 +120,7 @@
     </div>
 </div>
 <!-- SECTION CARACTERISTICAS -->
-<div class="container-fluid bg-oscuro text-white py-5">
+<div class="container-fluid bg-black text-white py-5">
     <div class="row ">
         <!-- COL IMAGE -->
         <div class="col-md-12 col-lg-6 py-5 d-flex flex-column justify-content-center">
@@ -295,7 +311,7 @@
     <div class="row">
         <div class="col">
             <div class="text-center">
-                <img alt="Mapa" class="pb-5" src="images/mapa-int.png" width="100%">
+                <div id="map"></div>
             </div>
         </div>
     </div>
@@ -328,7 +344,7 @@
     </div>
 </div>
 <!-- FOOTER -->
-<div class="container-fluid bg-oscuro text-white py-5">
+<div class="container-fluid bg-black text-white py-5">
     <div class="container">
         <div class="row">
             <!-- 1 COL -->
@@ -361,8 +377,160 @@
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+<script>
+
+    NProgress.configure({parent: '#map', showSpinner: true});
+
+    let map = L.map('map', {
+        center: [
+            -0.0848593222900214,
+            0.1529786013091339
+        ],
+        minZoom: 12,
+        maxZoom: 15
+    });
+
+    let imageBounds = [
+        [
+            -0.1697184584344759,
+            0.0
+        ],
+        [
+            0.0,
+            0.3059572026182678
+        ]
+    ];
+
+    L.imageOverlay('images/map.svg', imageBounds).addTo(map);
+
+    let geojsonLayer = L.geoJSON(null, {
+        style: function (feature) {
+            if (feature.properties.is_available) {
+                return {color: "transparent", fillOpacity: 0.9};
+            } else {
+                return {color: "#777775", fillOpacity: 0.9};
+            }
+        },
+        onEachFeature: function (feature, layer) {
+            layer.on("click", function (e) {
+                NProgress.start();
+                fetch(`https://ohmy-staging.reyes.dev/api/warehouses/${feature.properties.id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let imagePromises = data.images.map(image => new Promise((resolve, reject) => {
+                            let img = new Image();
+                            img.onload = resolve;
+                            img.onerror = reject;
+                            img.src = image;
+                        }));
+
+                        Promise.all(imagePromises)
+                            .then(() => {
+                                let imagesHtml = data.images.map((image, index) => `
+                        <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                            <a href="${image}" data-fancybox="gallery" data-caption="${data.name}">
+                                <img src="${image}" class="d-block w-100 mapafull" alt="...">
+                            </a>
+                        </div>
+                    `).join('');
+
+                                let cardContent = `
+<div class="row" style="height: 200px;">
+    <div class="image-col">
+        <div id="carouselImages" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                ${imagesHtml}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselImages" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselImages" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+        </div>
+    </div>
+    <div class="text-col">
+        <div class="card" style="width: 100%; height: 100%;">
+            <div class="card-header fw-bold text-uppercase">${data.name}</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>Ubicación:</strong> ${data.location}</li>
+                <li class="list-group-item"><strong>Tamaño:</strong> ${data.size} m²</li>
+                <li class="list-group-item"><strong>Color:</strong> ${data.color}</li>
+                <li class="list-group-item"><strong>Disponible:</strong> ${data.is_available ? "Sí" : "No"}</li>
+                <li class="list-group-item"><strong>Valor:</strong> ${data.price} UF mensual</li>
+            </ul>
+            <div class="card-footer p-0">
+                <a href="cotizar.html?warehouse=${data.location}" class="btn btn-sm ${data.is_available ? 'btn-warning' : 'btn-danger disabled'} text-white" style="width: 100%;">
+                    ${data.is_available ? 'Cotizar' : 'No disponible'}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+`;
+
+                                L.popup({
+                                    className: 'custom-popup',
+                                    minWidth: window.innerWidth < 768 ? window.innerWidth - 100 : 600
+                                })
+                                    .setLatLng(e.latlng)
+                                    .setContent(cardContent)
+                                    .openOn(map);
+
+
+                                $('.carousel').carousel();
+                                $("[data-fancybox]").fancybox({
+                                    buttons: ["close"],
+                                    thumbs: {autoStart: false},
+                                    toolbar: false
+                                });
+                                NProgress.done();
+                            })
+                            .catch(error => {
+                                NProgress.done();
+                                console.error("Error loading images", error);
+                            });
+                    });
+            });
+        },
+    }).addTo(map);
+
+
+    fetch("https://ohmy-staging.reyes.dev/api/warehouses/")
+        .then(function (response) {
+            NProgress.start();
+            return response.json();
+        })
+        .then(function (data) {
+            const geojsonData = {
+                type: "FeatureCollection",
+                features: data.map((warehouse) => ({
+                    type: "Feature",
+                    properties: {
+                        id: warehouse.id,
+                        name: warehouse.name,
+                        is_available: warehouse.is_available,
+                    },
+                    geometry: {
+                        type: "MultiPolygon",
+                        coordinates: warehouse.polygon,
+                    },
+                })),
+            };
+            geojsonLayer.addData(geojsonData);
+            NProgress.done();
+        });
+
+    map.fitBounds([
+        [
+            -0.1697184584344759,
+            0.3059572026182678
+        ],
+        [
+            0.0,
+            0.0
+        ],
+    ]);
+</script>
 </body>
 </html>

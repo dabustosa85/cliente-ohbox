@@ -63,5 +63,96 @@
 }
 
 .bg-oscuro {
-    background-color: #1d1d1b !important;
+    background-color: #232321 !important;
+}
+
+#map {
+    width: 100%;
+    height: 600px;
+    background-color: #232321 !important;
+}
+img.mapafull {
+    max-height: 200px;
+    object-fit: contain;
+}
+
+.custom-popup .leaflet-popup-content-wrapper {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.custom-popup .leaflet-popup-tip {
+    background-color: white;
+}
+
+.custom-popup .leaflet-popup-close-button {
+    color: #333;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: none;
+}
+
+.custom-popup .card {
+    border: none;
+}
+
+.custom-popup .list-group-item {
+    padding: 0.25rem 1rem;
+}
+
+.custom-popup .leaflet-popup-content {
+    width: auto;
+    margin: 0;
+    padding: 0;
+}
+
+.custom-popup .row {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.carousel-item img {
+    height: 100%;
+    object-fit: cover;
+}
+
+
+.image-col, .text-col {
+    padding: 0;
+    float: left;
+    height: 100%;
+}
+
+.image-col {
+    width: 50%;
+}
+
+.text-col {
+    width: 50%;
+}
+
+
+.text-col {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+
+.text-col .card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+
+.text-col .card-body {
+    flex-grow: 1;
+    overflow: auto;
+}
+
+
+.text-col .card-footer {
+    margin-top: auto;
 }
